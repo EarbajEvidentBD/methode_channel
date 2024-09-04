@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:methodechannel/data/post.dart';
+import 'package:methodechannel/widgets/custome_list.dart';
 
 void main() {
   runApp(MyApp2());
@@ -51,10 +52,7 @@ class _MyApp2State extends State<MyApp2> {
                 itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   final post = _posts[index];
-                  return ListTile(
-                    title: Text(post.title),
-                    subtitle: Text(post.body),
-                  );
+                  return CustomListItem(post: post);
                 },
               ),
       ),
