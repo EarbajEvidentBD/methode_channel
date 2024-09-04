@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:methodechannel/data/post.dart';
 
 void main() {
   runApp(MyApp2());
@@ -16,6 +19,9 @@ class _MyApp2State extends State<MyApp2> {
   static const platform = MethodChannel('com.example/my_channel');
   String _data = 'Fetching data...';
 
+  List<Post> _posts = [];
+  String _error = '';
+
   @override
   void initState() {
     // TODO: implement initState
@@ -30,15 +36,27 @@ class _MyApp2State extends State<MyApp2> {
         appBar: AppBar(
           title: Text('Flutter & Kotlin Example'),
         ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              _data,
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
+        // body: Center(
+        //   child: SingleChildScrollView(
+        //     padding: EdgeInsets.all(16.0),
+        //     child: Text(
+        //       _data,
+        //       style: TextStyle(fontSize: 16),
+        //     ),
+        //   ),
+        // ),
+        body: _error.isNotEmpty
+            ? Center(child: Text(_error))
+            : ListView.builder(
+                itemCount: _posts.length,
+                itemBuilder: (context, index) {
+                  final post = _posts[index];
+                  return ListTile(
+                    title: Text(post.title),
+                    subtitle: Text(post.body),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -46,15 +64,35 @@ class _MyApp2State extends State<MyApp2> {
   Future<void> _fetchApiData() async {
     try {
       final String result = await platform.invokeMethod('fetchApiData');
+      final List<dynamic> data = json.decode(result);
+
       setState(() {
-        _data = result;
+        _posts = data.map((item) => Post.fromJson(item)).toList();
       });
     } on PlatformException catch (e) {
       setState(() {
-        _data = 'Failed to fetch data: ${e.message}';
+        _error = 'Failed to fetch data: ${e.message}';
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to parse data: ${e.toString()}';
       });
     }
   }
+
+//   Future<void> _fetchApiData() async {
+//     try {
+//       final String result = await platform.invokeMethod('fetchApiData');
+//       setState(() {
+//         _data = result;
+//       });
+//     } on PlatformException catch (e) {
+//       setState(() {
+//         _data = 'Failed to fetch data: ${e.message}';
+//       });
+//     }
+//   }
+// }
 }
 
 class MyApp extends StatelessWidget {
